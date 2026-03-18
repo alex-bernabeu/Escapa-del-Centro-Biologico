@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>S.O.S. BIOLOGÍA - SISTEMA CRÍTICO</title>
+    <style>
+        body { background-color: #0d1117; color: #58a6ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        #terminal { background: #161b22; border: 2px solid #30363d; border-radius: 10px; padding: 30px; width: 85%; max-width: 700px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 12px; width: 90%; font-size: 1.1em; margin: 10px 0; }
+        button { background: #238636; color: white; border: none; padding: 12px 25px; cursor: pointer; border-radius: 6px; font-weight: bold; width: 100%; }
+        button:hover { background: #2ea043; }
+        .progress-bar { width: 100%; background: #30363d; height: 10px; border-radius: 5px; margin-bottom: 20px; }
+        #fill { background: #58a6ff; height: 100%; width: 0%; transition: 0.3s; border-radius: 5px; }
+        .status { font-size: 0.8em; color: #8b949e; text-transform: uppercase; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="status" id="status-text">Analizando secuencia... Pregunta 1/31</div>
+    <div class="progress-bar"><div id="fill"></div></div>
+
+    <div id="terminal">
+        <div id="game-content">
+            <h3 id="question-text">Cargando...</h3>
+            <input type="text" id="answer-input" placeholder="Introduce tu respuesta..." autocomplete="off">
+            <button onclick="processStep()" id="btn-action">SIGUIENTE</button>
+        </div>
+
+        <div id="final-screen" class="hidden" style="display:none; text-align: center;">
+            <h2 id="final-title">¡SISTEMA COMPLETADO!</h2>
+            <p id="final-msg"></p>
+            <button onclick="location.reload()" style="background:#da3633">REINTENTAR</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "¿Unidad mínima de vida?", a: "celula" },
+            { q: "¿Orgánulo de la respiración celular?", a: "mitocondria" },
+            { q: "¿Vasos que llevan sangre del corazón a órganos?", a: "arterias" },
+            { q: "¿Fuente de energía inmediata?", a: "glucidos" },
+            { q: "¿Órgano de mayor absorción de nutrientes?", a: "intestino delgado" },
+            { q: "¿Célula sexual femenina?", a: "ovulo" },
+            { q: "¿Hormona que regula el azúcar?", a: "insulina" },
+            { q: "¿Controla equilibrio y coordinación?", a: "cerebelo" },
+            { q: "¿Sacos de intercambio gaseoso en pulmones?", a: "alveolos" },
+            { q: "¿Parte líquida de la sangre?", a: "plasma" },
+            { q: "¿Proteína que transporta oxígeno?", a: "hemoglobina" },
+            { q: "¿Microorganismos que causan enfermedades?", a: "patogenos" },
+            { q: "¿Leucocitos son defensas...?", a: "especificas" },
+            { q: "¿Capa más externa de la piel?", a: "epidermis" },
+            { q: "¿Une los huesos en articulaciones?", a: "ligamentos" },
+            { q: "¿Unión de óvulo y espermatozoide?", a: "fecundacion" },
+            { q: "¿Órgano que produce la bilis?", a: "higado" },
+            { q: "¿Conducto que lleva orina de vejiga al exterior?", a: "uretra" },
+            { q: "¿Orgánulo con el ADN?", a: "nucleo" },
+            { q: "¿Glándulas que vierten hormonas a la sangre?", a: "endocrinas" },
+            { q: "¿Fase en la que se libera el óvulo?", a: "ovulacion" },
+            { q: "¿Sistema que elimina desechos celulares?", a: "excretor" },
+            { q: "¿Contracción del corazón?", a: "sistole" },
+            { q: "¿Vitamina de la luz solar?", a: "vitamina d" },
+            { q: "¿Nervios que llevan info de sentidos al cerebro?", a: "sensitivos" },
+            { q: "¿Proliferación incontrolada de células?", a: "cancer" },
+            { q: "¿Unidades funcionales del riñón?", a: "nefronas" },
+            { q: "¿Medio viscoso de la célula?", a: "citoplasma" },
+            { q: "¿Hueso más largo?", a: "femur" },
+            { q: "¿Vasos que devuelven sangre al corazón?", a: "venas" }
+        ];
+
+        let currentIndex = 0;
+        let errors = 0;
+        const VALID_CODE = "BIO-3ESO-EXIT";
+
+        function processStep() {
+            const inputField = document.getElementById('answer-input');
+            const val = inputField.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+            if (currentIndex < questions.length) {
+                // Verificar si es correcta en silencio
+                if (val !== questions[currentIndex].a.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")) {
+                    errors++;
+                }
+                currentIndex++;
+                showNext();
+            } else {
+                // Última pregunta: El Código
+                if (val === VALID_CODE && errors === 0) {
+                    showVictory(true);
+                } else {
+                    showVictory(false);
+                }
+            }
+        }
+
+        function showNext() {
+            const inputField = document.getElementById('answer-input');
+            inputField.value = "";
+            
+            if (currentIndex < questions.length) {
+                document.getElementById('question-text').innerText = questions[currentIndex].q;
+                document.getElementById('status-text').innerText = `Analizando secuencia... Pregunta ${currentIndex + 1}/31`;
+                document.getElementById('fill').style.width = `${(currentIndex/31)*100}%`;
+            } else {
+                // Pregunta final especial
+                document.getElementById('question-text').innerText = "PASO FINAL: Introduce el código de seguridad generado por el sistema:";
+                document.getElementById('status-text').innerText = "ESPERANDO CÓDIGO DE ACCESO...";
+                document.getElementById('fill').style.width = "95%";
+                document.getElementById('btn-action').innerText = "ABRIR COMPUERTA";
+                
+                // Pista sutil: el código se "genera" basándose en tus respuestas
+                console.log(errors === 0 ? "Código correcto: " + VALID_CODE : "Código corrupto detectado.");
+            }
+        }
+
+        function showVictory(isCorrect) {
+            document.getElementById('game-content').style.display = "none";
+            document.getElementById('final-screen').style.display = "block";
+            
+            if (isCorrect) {
+                document.getElementById('final-title').innerText = "🔓 ACCESO CONCEDIDO";
+                document.getElementById('final-title').style.color = "#238636";
+                document.getElementById('final-msg').innerText = "Felicidades, biólogo/a. Has respondido todo correctamente y el código ha funcionado. ¡Estás fuera!";
+            } else {
+                document.getElementById('final-title').innerText = "❌ ERROR DE PROTOCOLO";
+                document.getElementById('final-title').style.color = "#da3633";
+                document.getElementById('final-msg').innerText = "El código introducido es incorrecto o la secuencia de datos previa contenía errores. El sistema se ha bloqueado.";
+            }
+        }
+
+        showNext();
+    </script>
+</body>
+</html>
