@@ -76,39 +76,42 @@
             const val = inputField.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
             if (currentIndex < questions.length) {
-                // Verificar si es correcta en silencio
-                if (val !== questions[currentIndex].a.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")) {
+                // Validación silenciosa: guarda el error pero permite avanzar
+                const correct = questions[currentIndex].a.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (val !== correct) {
                     errors++;
                 }
                 currentIndex++;
                 showNext();
             } else {
-                // Última pregunta: El Código
-                if (val === VALID_CODE && errors === 0) {
-                    showVictory(true);
+                // Validación del CÓDIGO FINAL (Pregunta 31)
+                if (val === MASTER_CODE.toLowerCase() && errors === 0) {
+                    showFinal(true);
                 } else {
-                    showVictory(false);
+                    showFinal(false);
                 }
             }
         }
 
-        function showNext() {
+function showNext() {
             const inputField = document.getElementById('answer-input');
             inputField.value = "";
             
             if (currentIndex < questions.length) {
                 document.getElementById('question-text').innerText = questions[currentIndex].q;
-                document.getElementById('status-text').innerText = `Analizando secuencia... Pregunta ${currentIndex + 1}/31`;
+                document.getElementById('current-step').innerText = currentIndex + 1;
                 document.getElementById('fill').style.width = `${(currentIndex/31)*100}%`;
             } else {
-                // Pregunta final especial
-                document.getElementById('question-text').innerText = "PASO FINAL: Introduce el código de seguridad generado por el sistema:";
-                document.getElementById('status-text').innerText = "ESPERANDO CÓDIGO DE ACCESO...";
-                document.getElementById('fill').style.width = "95%";
-                document.getElementById('btn-action').innerText = "ABRIR COMPUERTA";
+                // MOMENTO CLAVE:
+                if (errors === 0) {
+                    document.getElementById('question-text').innerHTML = "DATOS VALIDADOS. EL CÓDIGO DE SALIDA ES: <br><br><span style='color:white; font-size:1.5em;'>" + MASTER_CODE + "</span><br><br>Introdúzcalo para abrir:";
+                } else {
+                    document.getElementById('question-text').innerHTML = "<span style='color:red;'>ERROR: DATOS CORRUPTOS.</span><br>No se pudo generar el código de salida. Revise sus respuestas desde el inicio.";
+                }
                 
-                // Pista sutil: el código se "genera" basándose en tus respuestas
-                console.log(errors === 0 ? "Código correcto: " + VALID_CODE : "Código corrupto detectado.");
+                document.getElementById('current-step').innerText = "31";
+                document.getElementById('fill').style.width = "100%";
+                document.getElementById('btn-action').innerText = "ABRIR COMPUERTA";
             }
         }
 
